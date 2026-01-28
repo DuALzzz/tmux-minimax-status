@@ -33,7 +33,7 @@ cd ~/.tmux/plugins/tmux-minimax-status
 ## ⚙️ Configuration
 
 * **Auto Mode**: Works out-of-the-box if you use **Claude Code**.
-* **Manual Mode**: Set `export MINIMAX_API_KEY="sk-..."` in your `.zshrc` or `.bashrc`.
+* **Manual Mode**: Set `export MINIMAX_API_KEY="YOUR_API_KEY"` in your `.zshrc` or `.bashrc`.
 
 ## 📄 License
 
