@@ -15,9 +15,11 @@ MINIMAX_API_URL="https://www.minimaxi.com/v1/api/openplatform/coding_plan/remain
 # Icons & Colors
 ICON_MAIN="📊"
 ICON_TIME="⏳"
-COLOR_WARN="#[fg=red]"
+COLOR_BAD="#[fg=red]"
 COLOR_GOOD="#[fg=cyan]"
 COLOR_RESET="#[fg=default]"
+# Warn when usage exceeds this percentage
+USAGE_WARN_THRESHOLD=90
 
 # --- 1. Dependency Check ---
 if ! command -v jq &> /dev/null; then
@@ -46,34 +48,32 @@ RESPONSE=$(curl -s --location "$MINIMAX_API_URL" \
     --header 'Content-Type: application/json')
 
 # --- 4. Parse & Display ---
-# Logic: Calculate percentage and hours
+# Logic: Calculate usage percentage and hours remaining
 RESULT=$(echo "$RESPONSE" | jq -r '
-    .model_remains[0] | 
+    .model_remains[0] |
     if . then
-        (.current_interval_total_count - .current_interval_usage_count) as $left |
-        (.current_interval_total_count) as $total |
-        (( $left / $total ) * 100) as $pct |
+        (.current_interval_usage_count / .current_interval_total_count * 100) as $usage |
         (.remains_time / 1000 / 3600 | floor) as $hours |
-        
-        {pct: $pct, h: $hours}
+
+        {usage: $usage, h: $hours}
     else
         empty
     end
 ')
 
 if [[ -n "$RESULT" ]]; then
-    PCT=$(echo "$RESULT" | jq '.pct')
+    USAGE=$(echo "$RESULT" | jq '.usage')
     HOURS=$(echo "$RESULT" | jq '.h')
 
-    # Alert: Red if usage < 10%
-    if (( $(echo "$PCT < 10" | bc -l) )); then
-        COLOR="$COLOR_WARN"
+    # Alert: Red if usage exceeds threshold
+    if (( $(echo "$USAGE > $USAGE_WARN_THRESHOLD" | bc -l) )); then
+        COLOR="$COLOR_BAD"
     else
         COLOR="$COLOR_GOOD"
     fi
 
     # Output: 📊 12.5% ⏳ 4h
-    printf "${COLOR}%s %.1f%% ${COLOR_RESET}%s %.0fh" "$ICON_MAIN" "$PCT" "$ICON_TIME" "$HOURS"
+    printf "${COLOR}%s %.1f%% ${COLOR_RESET}%s %.0fh" "$ICON_MAIN" "$USAGE" "$ICON_TIME" "$HOURS"
 else
     echo "Err"
 fi
