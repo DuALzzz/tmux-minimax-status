@@ -16,7 +16,7 @@ MINIMAX_API_URL="https://www.minimaxi.com/v1/api/openplatform/coding_plan/remain
 ICON_MAIN="📊"
 ICON_TIME="⏳"
 COLOR_BAD="#[fg=red]"
-COLOR_GOOD="#[fg=cyan]"
+COLOR_GOOD="#[fg=colour208]"
 COLOR_RESET="#[fg=default]"
 # Warn when usage exceeds this percentage
 USAGE_WARN_THRESHOLD=90
@@ -48,14 +48,14 @@ RESPONSE=$(curl -s --location "$MINIMAX_API_URL" \
     --header 'Content-Type: application/json')
 
 # --- 4. Parse & Display ---
-# Logic: Calculate usage percentage and hours remaining
+# Logic: Calculate usage percentage and remaining time
 RESULT=$(echo "$RESPONSE" | jq -r '
     .model_remains[0] |
     if . then
         (.current_interval_usage_count / .current_interval_total_count * 100) as $usage |
-        (.remains_time / 1000 / 3600 | floor) as $hours |
+        (.remains_time / 1000 / 60 | floor) as $minutes |
 
-        {usage: $usage, h: $hours}
+        {usage: $usage, minutes: $minutes}
     else
         empty
     end
@@ -63,7 +63,7 @@ RESULT=$(echo "$RESPONSE" | jq -r '
 
 if [[ -n "$RESULT" ]]; then
     USAGE=$(echo "$RESULT" | jq '.usage')
-    HOURS=$(echo "$RESULT" | jq '.h')
+    MINUTES=$(echo "$RESULT" | jq '.minutes')
 
     # Alert: Red if usage exceeds threshold
     if (( $(echo "$USAGE > $USAGE_WARN_THRESHOLD" | bc -l) )); then
@@ -72,8 +72,15 @@ if [[ -n "$RESULT" ]]; then
         COLOR="$COLOR_GOOD"
     fi
 
-    # Output: 📊 12.5% ⏳ 4h
-    printf "${COLOR}%s %.1f%% ${COLOR_RESET}%s %.0fh" "$ICON_MAIN" "$USAGE" "$ICON_TIME" "$HOURS"
+    # Format time: show minutes if < 60, otherwise show hours
+    if (( MINUTES < 60 )); then
+        TIME_STR="${MINUTES}m"
+    else
+        TIME_STR="$((MINUTES / 60))h"
+    fi
+
+    # Output: 📊 12.5% ⏳ 4h or 📊 12.5% ⏳ 30m
+    printf "${COLOR}%s %.1f%% ${COLOR_RESET}%s %s" "$ICON_MAIN" "$USAGE" "$ICON_TIME" "$TIME_STR"
 else
     echo "Err"
 fi
