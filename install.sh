@@ -21,13 +21,13 @@ chmod +x "$SCRIPT_DIR/scripts/"*.sh
 # Remove existing plugin config if present (for updates)
 if grep -q "$MARKER" "$TMUX_CONF"; then
     echo "🔄 Updating existing installation..."
-    grep -v "$MARKER" "$TMUX_CONF" | grep -v "status-interval 300" | grep -v "minimax_status.sh" > "$TMUX_CONF.tmp" && mv "$TMUX_CONF.tmp" "$TMUX_CONF"
+    grep -v "$MARKER" "$TMUX_CONF" | grep -v "status-interval 60" | grep -v "minimax_status.sh" > "$TMUX_CONF.tmp" && mv "$TMUX_CONF.tmp" "$TMUX_CONF"
 fi
 
 # Append configuration
 echo "" >> "$TMUX_CONF"
 echo "$MARKER" >> "$TMUX_CONF"
-echo "set -g status-interval 300" >> "$TMUX_CONF"
+echo "set -g status-interval 60" >> "$TMUX_CONF"
 echo "set -g status-right \"#($SCRIPT_DIR/scripts/minimax_status.sh) | %H:%M\"" >> "$TMUX_CONF"
 
 echo "✅ Configuration added to $TMUX_CONF"

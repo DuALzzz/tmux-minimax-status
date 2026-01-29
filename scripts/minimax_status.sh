@@ -72,14 +72,10 @@ if [[ -n "$RESULT" ]]; then
         COLOR="$COLOR_GOOD"
     fi
 
-    # Format time: show minutes if < 60, otherwise show hours
-    if (( MINUTES < 60 )); then
-        TIME_STR="${MINUTES}m"
-    else
-        TIME_STR="$((MINUTES / 60))h"
-    fi
+    # Format time: always show total minutes
+    TIME_STR="${MINUTES}m"
 
-    # Output: 📊 12.5% ⏳ 4h or 📊 12.5% ⏳ 30m
+    # Output: 📊 12.5% ⏳ 30m or 📊 12.5% ⏳ 90m
     printf "${COLOR}%s %.1f%% ${COLOR_RESET}%s %s" "$ICON_MAIN" "$USAGE" "$ICON_TIME" "$TIME_STR"
 else
     echo "Err"
