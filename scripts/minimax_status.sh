@@ -16,7 +16,7 @@ MINIMAX_API_URL="https://www.minimaxi.com/v1/api/openplatform/coding_plan/remain
 ICON_MAIN="📊"
 ICON_TIME="⏳"
 COLOR_WARN="#[fg=red]"
-COLOR_GOOD="#[fg=green]"
+COLOR_GOOD="#[fg=cyan]"
 COLOR_RESET="#[fg=default]"
 
 # --- 1. Dependency Check ---
